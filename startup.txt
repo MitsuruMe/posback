@@ -1,3 +1,1 @@
-python3 -m venv venv
-./venv/bin/pip install -r requirements.txt
-./venv/bin/uvicorn app:app --host 0.0.0.0
+uvicorn app:app --host 0.0.0.0
