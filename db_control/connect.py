@@ -8,27 +8,24 @@ base_path = Path(__file__).parents[1]  # backendディレクトリへのパス
 env_path = base_path / '.env'
 load_dotenv(dotenv_path=env_path)
 
-# SSL証明書のパス（存在する場合のみ使用）
-ssl_cert = str(base_path / 'DigiCertGlobalRootCA.crt.pem')
+# データベース接続情報（デフォルト値付き）
+DB_USER = os.getenv('DB_USER', 'postgres')
+DB_PASSWORD = os.getenv('DB_PASSWORD', '')
+DB_HOST = os.getenv('DB_HOST', 'localhost')
+DB_PORT = os.getenv('DB_PORT', '5432')
+DB_NAME = os.getenv('DB_NAME', 'postgres')
 
-# データベース接続情報
-DB_USER = os.getenv('DB_USER')
-DB_PASSWORD = os.getenv('DB_PASSWORD')
-DB_HOST = os.getenv('DB_HOST')
-DB_PORT = os.getenv('DB_PORT') 
-DB_NAME = os.getenv('DB_NAME')
+# 環境変数の検証
+if not DB_PASSWORD:
+    raise ValueError("DB_PASSWORD environment variable is required")
 
-# MySQLのURL構築
-DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+# PostgreSQLのURL構築
+DATABASE_URL = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-# SSL証明書が存在する場合のみSSL設定を追加
-connect_args = {}
-if os.path.exists(ssl_cert):
-    connect_args = {
-        "ssl": {
-            "ssl_ca": ssl_cert
-        }
-    }
+# Supabase用のSSL設定
+connect_args = {
+    "sslmode": "require"
+}
 
 # エンジンの作成
 engine = create_engine(
@@ -40,6 +37,9 @@ engine = create_engine(
 )
 
 print("Current working directory:", os.getcwd())
-print("Certificate file exists:", os.path.exists(ssl_cert))
 print("Environment file exists:", os.path.exists(env_path))
 print("Database URL (without password):", DATABASE_URL.replace(DB_PASSWORD, "****"))
+print(f"DB_HOST: {DB_HOST}")
+print(f"DB_PORT: {DB_PORT}")
+print(f"DB_NAME: {DB_NAME}")
+print(f"DB_USER: {DB_USER}")
